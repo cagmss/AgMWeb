@@ -40,19 +40,27 @@
     <link href='css/uploadify.css' rel='stylesheet'>
     <link href='css/animate.min.css' rel='stylesheet'>
     <link rel="stylesheet" type="text/css" href="css/lightgallery.min.css">
-    <!-- jQuery -->
-    <script src="js/jquery.min.js"></script>
+    <link href='css/datepicker.css' rel='stylesheet'>
+    <!-- jQuery
+    <script src="js/jquery.min.js"></script> -->
 
     <!-- The HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap-datepicker.js"></script>
+
     <!-- The fav icon -->
     <link rel="shortcut icon" href="img/favicon.ico">
     <script type="text/javascript">
         function load() {
             showLeftNavi("评价");
+            var nowTemp = new Date();
+            var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+            var yesterday = addDate(now, -1);
+            cFunc(yesterday);
         }
 
         function showLeftNavi(name) {
@@ -96,6 +104,7 @@
             var eva_meteo = '降水量要素,降水距平要素,降水量同期对比要素,平均气温要素,平均气温距平要素,平均气温同期对比要素,日照时数要素,日照时数距平要素,日照时数同期对比要素';
             var m = eva_meteo.split(",");
             var ul = document.getElementById("lightgallery");
+            clearUl(ul);
             for (var i = 0; i < m.length; i++) {
                 var desc = m[i];
 
@@ -108,7 +117,58 @@
             }
             lightGallery(document.getElementById('lightgallery'));
         }
+        if (top.location != location) {
+            top.location.href = document.location.href;
+        }
+        $(function() {
+            window.prettyPrint && prettyPrint();
+            $('#dp').datepicker({
+                format: 'yyyy-mm-dd'
+            });
+
+            // disabling dates
+            var nowTemp = new Date();
+            var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+
+            var checkin = $('#dp').datepicker()
+                .on('changeDate', function(ev) {
+                    cFunc(ev.date.valueOf());
+                });
+        });
+
+        function addDate(dd, dadd) {
+            var a = new Date(dd)
+            a = a.valueOf()
+            a = a + dadd * 24 * 60 * 60 * 1000
+            a = new Date(a)
+            return a;
+        }
+
+        function cFunc(dd) {
+            var ul = document.getElementById("FileDate");
+            clearUl(ul);
+
+            for (var i = 0; i < 5; i++) {
+                var showDate = addDate(dd, -i);
+                var year, month, day;
+                year = showDate.getFullYear().toString();
+                if (showDate.getMonth() + 1 < 10) {
+                    month = "0" + (showDate.getMonth() + 1).toString();
+                } else {
+                    month = (showDate.getMonth() + 1).toString();
+                }
+                day = showDate.getDate();
+                var path = "images/eva/meteo/日/" + year + "/" + month + "/" + day + "/";
+                var li = document.createElement("li");
+                li.innerHTML = "<a href='#' onclick='javascript:loadGallery(\"" + path + "\");'>" +
+                    showDate.getFullYear() + '-' + (showDate.getMonth() + 1) + '-' + showDate.getDate() + "</a>";
+                ul.appendChild(li);
+                if (i == 0)
+                    loadGallery(path);
+            }
+        }
     </script>
+
 </head>
 
 <body onload="load()">
@@ -124,7 +184,6 @@
             </button>
             <a class="navbar-brand" href="index.html"> <img alt="CAgMSS logo" src="img/logo20.png" class="hidden-xs" />
                 <span>CAgMSS</span></a>
-
 
             <ul class="collapse navbar-collapse nav navbar-nav top-menu">
                 <li><a href="#" onclick="javascript:showLeftNavi('评价');"><i class="glyphicon glyphicon-globe"></i> 评价</a></li>
@@ -148,44 +207,35 @@
             </div>
             <div id="content" class="col-lg-10 col-sm-10">
                 <!-- content starts -->
-                <div>
-                    <ul class="breadcrumb">
-                        <li>
-                            <a href="#">主页</a>
-                        </li>
-                        <li>
-                            <a href="#">评价</a>
-                        </li>
-                    </ul>
+                <div class="row main-content-top">
+                    <div class="col-sm-1">
+                        <div class="btn-group navbar-inner">
+                            <!-- 时间周期选择按钮 -->
+                            <button id="period" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">日<span class="caret"></span></button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="#" onclick="javascript:$('#period').html('日<span class=\'caret\'></span>');">日</a></li>
+                                <li><a href="#" onclick="javascript:$('#period').html('周<span class=\'caret\'></span>');">周</a></li>
+                                <li><a href="#" onclick="javascript:$('#period').html('旬<span class=\'caret\'></span>');">旬</a></li>
+                                <li><a href="#" onclick="javascript:$('#period').html('月<span class=\'caret\'></span>');">月</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-sm-7">
+                        <div class="navbar-inner">
+                            <ul class="collapse navbar-collapse nav navbar-nav top-menu" id="FileDate">
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="navbar-inner">
+                            自定义：<input type="text" value="2017-01-29" data-date-format="yyyy-mm-dd" id="dp">
+                        </div>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="box col-md-12 background-color: #152836">
                         <div class="demo-gallery">
                             <ul id="lightgallery" class="list-unstyled row">
-                                <!---- <li class="col-xs-6 col-sm-4 col-md-3" data-src="images/1-1600.jpg" data-sub-html="<h4>Fading Light</h4><p>Classic view from Rigwood Jetty on Coniston Water an old archive shot similar to an old post but a little later on.</p>" data-pinterest-text="Pin it1"
-                                    data-tweet-text="share on twitter 1">
-                                    <a href="">
-                                        <img class="img-responsive" src="images/thumb-1.jpg" alt="Thumb-1">
-                                    </a>
-                                    </li>
-                                    <li class="col-xs-6 col-sm-4 col-md-3" data-responsive="images/2-375.jpg 375, images/2-480.jpg 480, images/2.jpg 800" data-src="images/2-1600.jpg" data-sub-html="<h4>Bowness Bay</h4><p>A beautiful Sunrise this morning taken En-route to Keswick not one as planned but I'm extremely happy I was passing the right place at the right time....</p>"
-                                        data-pinterest-text="Pin it1" data-tweet-text="share on twitter 1">
-                                        <a href="">
-                                            <img class="img-responsive" src="images/thumb-2.jpg" alt="Thumb-2">
-                                        </a>
-                                    </li>
-                                    <li class="col-xs-6 col-sm-4 col-md-3" data-responsive="images/13-375.jpg 375, images/13-480.jpg 480, images/13.jpg 800" data-src="images/13-1600.jpg" data-sub-html="<h4>Bowness Bay</h4><p>A beautiful Sunrise this morning taken En-route to Keswick not one as planned but I'm extremely happy I was passing the right place at the right time....</p>"
-                                        data-pinterest-text="Pin it1" data-tweet-text="share on twitter 1">
-                                        <a href="">
-                                            <img class="img-responsive" src="images/thumb-13.jpg" alt="Thumb-3">
-                                        </a>
-                                    </li>
-                                    <li class="col-xs-6 col-sm-4 col-md-3" data-responsive="images/4-375.jpg 375, images/4-480.jpg 480, images/4.jpg 800" data-src="images/4-1600.jpg" data-sub-html="<h4>Bowness Bay</h4><p>A beautiful Sunrise this morning taken En-route to Keswick not one as planned but I'm extremely happy I was passing the right place at the right time....</p>"
-                                        data-pinterest-text="Pin it1" data-tweet-text="share on twitter 1">
-                                        <a href="">
-                                            <img class="img-responsive" src="images/thumb-4.jpg" alt="Thumb-4">
-                                        </a>
-                                    </li>-->
                             </ul>
                         </div>
                     </div>
@@ -226,6 +276,8 @@
             <script src="js/lg-fullscreen.js"></script>
             <script src="js/lg-zoom.js"></script>
             <script src="js/lg-share.js"></script>
+            <script type="text/javascript" src="js/bootstrap.min.js"></script>
 </body>
+
 
 </html>
